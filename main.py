@@ -196,7 +196,7 @@ class mywindow(Ui_MainWindow):
     def trainAdd(self):
         basiccursor.execute('select id from train order by id desc limit 0,1')
         lines = basiccursor.fetchone()[0]
-        time = self.time_train_depart.dateTime().toString("yyyy-MM-dd hh:mm:ss.000")
+        time = self.time_train_depart.time().toString("hh:mm:ss.000")
         basiccursor.execute('insert into train values (?,?,?,NULL,?,"NOTSET",0,0,?,?,?)',
             (lines+1,self.lineedit_train_code.text() , time, self.combo_tain_depart.currentText().split("|")[1], self.spin_train_carriage.value(), self.spin_train_first.value(), self.spin_train_second.value()))
         traincursor.execute('create table train_'+str(lines+1)+' ( \'id\' INT PRIMARY KEY NOT NULL, \'linkid\' INT NOT NULL ) WITHOUT ROWID')
@@ -266,9 +266,9 @@ class mywindow(Ui_MainWindow):
         #print(laststation, links, during, cost)
         basiccursor.execute('select "departtime" from train where id=?', (trainid, ))
         departtime = basiccursor.fetchone()[0]
-        arrivetime = datetime.datetime.strptime(departtime, '%Y-%m-%d %H:%M:%S.000')
+        arrivetime = datetime.datetime.strptime(departtime, '%H:%M:%S.000')
         arrivetime = arrivetime+datetime.timedelta(minutes=during)
-        arivetimetext = arrivetime.strftime('%Y-%m-%d %H:%M:%S.000')
+        arivetimetext = arrivetime.strftime('%H:%M:%S.000')
         #print(arivetimetext, laststation, links, cost)
         basiccursor.execute('update train set "arrivetime"=?,"to"=?,"links"=?,"totalcost"=? where id=?', (arivetimetext,laststation ,links ,cost, trainid))
         basicconn.commit()

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project RailwayInfoSys -->
-<!-- Saved: 2018-04-28, 00:26:02 -->
+<!-- Saved: 2018-04-28, 20:34:58 -->
 <!-- Copyright (C) 2018 ,  -->
 <Project version="5.1">
   <Language></Language>
@@ -14,7 +14,6 @@
   <Eol index="0"/>
   <Sources>
     <Source>Ui_mainWindow.py</Source>
-    <Source>__init__.py</Source>
     <Source>main.py</Source>
   </Sources>
   <Forms>
