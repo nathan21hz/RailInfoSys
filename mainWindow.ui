@@ -30,7 +30,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="tab_user">
      <attribute name="title">
@@ -742,6 +742,11 @@
       </column>
       <column>
        <property name="text">
+        <string>车次</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>发车时间</string>
        </property>
       </column>
@@ -825,7 +830,7 @@
        <property name="geometry">
         <rect>
          <x>110</x>
-         <y>30</y>
+         <y>60</y>
          <width>171</width>
          <height>22</height>
         </rect>
@@ -835,7 +840,7 @@
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>30</y>
+         <y>60</y>
          <width>71</width>
          <height>21</height>
         </rect>
@@ -848,9 +853,9 @@
        <property name="geometry">
         <rect>
          <x>110</x>
-         <y>70</y>
+         <y>100</y>
          <width>171</width>
-         <height>21</height>
+         <height>20</height>
         </rect>
        </property>
       </widget>
@@ -858,7 +863,7 @@
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>70</y>
+         <y>99</y>
          <width>71</width>
          <height>21</height>
         </rect>
@@ -871,7 +876,7 @@
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>110</y>
+         <y>140</y>
          <width>61</width>
          <height>21</height>
         </rect>
@@ -884,7 +889,7 @@
        <property name="geometry">
         <rect>
          <x>90</x>
-         <y>110</y>
+         <y>140</y>
          <width>42</width>
          <height>22</height>
         </rect>
@@ -894,7 +899,7 @@
        <property name="geometry">
         <rect>
          <x>150</x>
-         <y>110</y>
+         <y>140</y>
          <width>61</width>
          <height>21</height>
         </rect>
@@ -907,7 +912,7 @@
        <property name="geometry">
         <rect>
          <x>210</x>
-         <y>110</y>
+         <y>140</y>
          <width>42</width>
          <height>22</height>
         </rect>
@@ -917,7 +922,7 @@
        <property name="geometry">
         <rect>
          <x>340</x>
-         <y>110</y>
+         <y>140</y>
          <width>42</width>
          <height>22</height>
         </rect>
@@ -927,7 +932,7 @@
        <property name="geometry">
         <rect>
          <x>280</x>
-         <y>110</y>
+         <y>140</y>
          <width>61</width>
          <height>21</height>
         </rect>
@@ -940,7 +945,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>140</y>
+         <y>170</y>
          <width>441</width>
          <height>16</height>
         </rect>
@@ -953,7 +958,7 @@
        <property name="geometry">
         <rect>
          <x>320</x>
-         <y>30</y>
+         <y>60</y>
          <width>51</width>
          <height>51</height>
         </rect>
@@ -967,7 +972,7 @@
        <property name="geometry">
         <rect>
          <x>110</x>
-         <y>160</y>
+         <y>190</y>
          <width>171</width>
          <height>31</height>
         </rect>
@@ -977,7 +982,7 @@
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>160</y>
+         <y>190</y>
          <width>71</width>
          <height>31</height>
         </rect>
@@ -990,7 +995,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>210</y>
+         <y>230</y>
          <width>91</width>
          <height>41</height>
         </rect>
@@ -1003,7 +1008,7 @@
        <property name="geometry">
         <rect>
          <x>190</x>
-         <y>210</y>
+         <y>230</y>
          <width>91</width>
          <height>41</height>
         </rect>
@@ -1016,7 +1021,7 @@
        <property name="geometry">
         <rect>
          <x>310</x>
-         <y>210</y>
+         <y>230</y>
          <width>91</width>
          <height>41</height>
         </rect>
@@ -1029,7 +1034,7 @@
        <property name="geometry">
         <rect>
          <x>380</x>
-         <y>30</y>
+         <y>60</y>
          <width>51</width>
          <height>51</height>
         </rect>
@@ -1037,6 +1042,32 @@
        <property name="text">
         <string>删除
 车辆</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_23">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>30</y>
+         <width>71</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>班次号：</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineedit_train_code">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>30</y>
+         <width>171</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>

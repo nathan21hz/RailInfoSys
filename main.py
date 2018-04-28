@@ -53,13 +53,13 @@ class mywindow(Ui_MainWindow):
             basiccursor.execute('select * from train')
             lines = basiccursor.fetchall()
             for index, l in enumerate(lines):
-                for i in range(3, 5):
+                for i in range(4, 6):
                     self.table_train.setItem(index,i, QtWidgets.QTableWidgetItem(stationCodeToName(l[i])))
             for index, l in enumerate(lines):
-                for i in range(0, 3):
+                for i in range(0, 4):
                     self.table_train.setItem(index,i, QtWidgets.QTableWidgetItem(str(l[i])))
             for index, l in enumerate(lines):
-                for i in range(5, 10):
+                for i in range(6, 11):
                     self.table_train.setItem(index,i, QtWidgets.QTableWidgetItem(str(l[i])))
             
             basiccursor.execute('select * from station')
@@ -197,11 +197,11 @@ class mywindow(Ui_MainWindow):
         basiccursor.execute('select id from train order by id desc limit 0,1')
         lines = basiccursor.fetchone()[0]
         time = self.time_train_depart.dateTime().toString("yyyy-MM-dd hh:mm:ss.000")
-        basiccursor.execute('insert into train values (?,?,NULL,?,"NOTSET",0,0,?,?,?)',
-            (lines+1, time, self.combo_tain_depart.currentText().split("|")[1], self.spin_train_carriage.value(), self.spin_train_first.value(), self.spin_train_second.value()))
+        basiccursor.execute('insert into train values (?,?,?,NULL,?,"NOTSET",0,0,?,?,?)',
+            (lines+1,self.lineedit_train_code.text() , time, self.combo_tain_depart.currentText().split("|")[1], self.spin_train_carriage.value(), self.spin_train_first.value(), self.spin_train_second.value()))
         traincursor.execute('create table train_'+str(lines+1)+' ( \'id\' INT PRIMARY KEY NOT NULL, \'linkid\' INT NOT NULL ) WITHOUT ROWID')
-        basicconn.commit()
-        trainconn.commit()
+        #basicconn.commit()
+        #trainconn.commit()
         self.refreshAll()
         pass
     
