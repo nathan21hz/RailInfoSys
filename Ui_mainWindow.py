@@ -334,7 +334,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralWidget)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(3)
+        self.tabWidget.setCurrentIndex(0)
         self.button_user_edit.clicked.connect(self.userEdit)
         self.button_user_del.clicked.connect(self.userDel)
         self.button_station_edit.clicked.connect(self.stationEdit)
