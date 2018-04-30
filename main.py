@@ -1,5 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 from Ui_mainWindow import Ui_MainWindow
+from Ui_loginWindow import Ui_Login
 import sqlite3
 import datetime
 
@@ -7,10 +9,13 @@ basicconn = sqlite3.connect('./DB/BasicData.db')
 basiccursor = basicconn.cursor()
 trainconn = sqlite3.connect('./DB/Train.db')
 traincursor = trainconn.cursor()
-class mywindow(Ui_MainWindow):
+userlevel = 0
+
+class MyWindow(Ui_MainWindow):
     #刷新列表
     def refreshAll(self):
         page = self.tabWidget.currentIndex()
+        #self.tabWidget.setTabEnabled(1, False)
         if(page == 0):
             self.list_user.clear()
             basiccursor.execute("select * from userinfo")
@@ -109,23 +114,26 @@ class mywindow(Ui_MainWindow):
    
     #编辑车站
     def stationEdit(self):
-        basiccursor.execute('update station set code=?,name=?,type=? where id=?', (self.lineedit_station_code.text(), self.lineedit_station_name.text(),self.spin_train_type.value() ,self.list_station_list.currentItem().text().split("|")[0]))
-        basicconn.commit()
-        self.refreshAll()
-    
+        if(checkUserlevel(0)):
+            basiccursor.execute('update station set code=?,name=?,type=? where id=?', (self.lineedit_station_code.text(), self.lineedit_station_name.text(),self.spin_train_type.value() ,self.list_station_list.currentItem().text().split("|")[0]))
+            basicconn.commit()
+            self.refreshAll()
+        
     #新增车站
     def stationAdd(self):
-        basiccursor.execute('select id from station order by id desc limit 0,1')
-        lines = basiccursor.fetchone()[0]
-        basiccursor.execute('insert into station values (?,?,?,?)', (lines+1,self.lineedit_station_code.text(),self.lineedit_station_name.text(),self.spin_train_type.value()))
-        basicconn.commit()
-        self.refreshAll()
+        if(checkUserlevel(0)):
+            basiccursor.execute('select id from station order by id desc limit 0,1')
+            lines = basiccursor.fetchone()[0]
+            basiccursor.execute('insert into station values (?,?,?,?)', (lines+1,self.lineedit_station_code.text(),self.lineedit_station_name.text(),self.spin_train_type.value()))
+            basicconn.commit()
+            self.refreshAll()
         
     #删除车站
     def stationDel(self):
-        basiccursor.execute('delete from station where id=?', (self.list_station_list.currentItem().text().split("|")[0], ))
-        basicconn.commit()
-        self.refreshAll()
+        if(checkUserlevel(0)):
+            basiccursor.execute('delete from station where id=?', (self.list_station_list.currentItem().text().split("|")[0], ))
+            basicconn.commit()
+            self.refreshAll()
     
     def lineTablere(self):
         id =  self.table_line.item(self.table_line.currentRow(), 0).text()
@@ -138,26 +146,29 @@ class mywindow(Ui_MainWindow):
         self.spin_line_cost.setValue(oneline[4])
     
     def lineEdit(self):
-        id =  self.table_line.item(self.table_line.currentRow(), 0).text()
-        basiccursor.execute('update raillink set time=?,cost=? where id=?', (self.spin_line_time.value(), self.spin_line_cost.value(), id))
-        basicconn.commit()
-        self.refreshAll()
+        if(checkUserlevel(0)):
+            id =  self.table_line.item(self.table_line.currentRow(), 0).text()
+            basiccursor.execute('update raillink set time=?,cost=? where id=?', (self.spin_line_time.value(), self.spin_line_cost.value(), id))
+            basicconn.commit()
+            self.refreshAll()
         
     #添加线路
     def lineAdd(self):
-        basiccursor.execute('select id from raillink order by id desc limit 0,1')
-        lines = basiccursor.fetchone()[0]
-        basiccursor.execute('insert into raillink values (?,?,?,?,?)', (lines+1,self.combo_line_depart.currentText().split("|")[1],self.combo_line_arrive.currentText().split("|")[1],self.spin_line_time.value(),self.spin_line_cost.value()))
-        basicconn.commit()
-        self.refreshAll()
+        if(checkUserlevel(0)):
+            basiccursor.execute('select id from raillink order by id desc limit 0,1')
+            lines = basiccursor.fetchone()[0]
+            basiccursor.execute('insert into raillink values (?,?,?,?,?)', (lines+1,self.combo_line_depart.currentText().split("|")[1],self.combo_line_arrive.currentText().split("|")[1],self.spin_line_time.value(),self.spin_line_cost.value()))
+            basicconn.commit()
+            self.refreshAll()
  
     #删除线路 
     def lineDel(self):
-        id =  self.table_line.item(self.table_line.currentRow(), 0).text()
-        basiccursor.execute('delete from raillink where id=?', (id, ))
-        basicconn.commit()
-        self.refreshAll()
-    
+        if(checkUserlevel(0)):
+            id =  self.table_line.item(self.table_line.currentRow(), 0).text()
+            basiccursor.execute('delete from raillink where id=?', (id, ))
+            basicconn.commit()
+            self.refreshAll()
+        
     #车辆列表选择动作
     def trainTablere(self):
         self.list_train_line.clear()
@@ -194,85 +205,119 @@ class mywindow(Ui_MainWindow):
     
     #添加车辆
     def trainAdd(self):
-        basiccursor.execute('select id from train order by id desc limit 0,1')
-        lines = basiccursor.fetchone()[0]
-        time = self.time_train_depart.time().toString("hh:mm:ss.000")
-        basiccursor.execute('insert into train values (?,?,?,NULL,?,"NOTSET",0,0,?,?,?)',
-            (lines+1,self.lineedit_train_code.text() , time, self.combo_tain_depart.currentText().split("|")[1], self.spin_train_carriage.value(), self.spin_train_first.value(), self.spin_train_second.value()))
-        traincursor.execute('create table train_'+str(lines+1)+' ( \'id\' INT PRIMARY KEY NOT NULL, \'linkid\' INT NOT NULL ) WITHOUT ROWID')
-        #basicconn.commit()
-        #trainconn.commit()
-        self.refreshAll()
-        pass
+        if(checkUserlevel(0)):
+            basiccursor.execute('select id from train order by id desc limit 0,1')
+            lines = basiccursor.fetchone()[0]
+            time = self.time_train_depart.time().toString("hh:mm:ss.000")
+            basiccursor.execute('insert into train values (?,?,?,NULL,?,"NOTSET",0,0,?,?,?)',
+                (lines+1,self.lineedit_train_code.text() , time, self.combo_tain_depart.currentText().split("|")[1], self.spin_train_carriage.value(), self.spin_train_first.value(), self.spin_train_second.value()))
+            traincursor.execute('create table train_'+str(lines+1)+' ( \'id\' INT PRIMARY KEY NOT NULL, \'linkid\' INT NOT NULL ) WITHOUT ROWID')
+            #basicconn.commit()
+            #trainconn.commit()
+            self.refreshAll()
+            pass
     
     #删除车辆
     def trainDel(self):
-        self.list_train_line.clear()
-        self.combo_tain_line.clear()
-        id =  self.table_train.item(self.table_train.currentRow(), 0).text()
-        traincursor.execute('drop table train_'+str(id))
-        basiccursor.execute('delete from train where id=?', (id, ))
-        basicconn.commit()
-        trainconn.commit()
-        self.refreshAll()
-        pass
-    
+        if(checkUserlevel(0)):
+            self.list_train_line.clear()
+            self.combo_tain_line.clear()
+            id =  self.table_train.item(self.table_train.currentRow(), 0).text()
+            traincursor.execute('drop table train_'+str(id))
+            basiccursor.execute('delete from train where id=?', (id, ))
+            basicconn.commit()
+            trainconn.commit()
+            self.refreshAll()
+            pass
+        
     #添加车辆线路
     def trainLineadd(self):
-        id =  self.table_train.item(self.table_train.currentRow(), 0).text()
-        tablename = 'train_'+str(id)
-        traincursor.execute('select count(*) from '+tablename)
-        lines = traincursor.fetchone()[0]
-        traincursor.execute(('insert into '+tablename+' values(?,?)'), (lines+1, self.combo_tain_line.currentText().split('|')[0]))
-        trainconn.commit()
-        self.trainTablere()
-        #print (lines)
-        pass
+        if(checkUserlevel(0)):
+            id =  self.table_train.item(self.table_train.currentRow(), 0).text()
+            tablename = 'train_'+str(id)
+            traincursor.execute('select count(*) from '+tablename)
+            lines = traincursor.fetchone()[0]
+            traincursor.execute(('insert into '+tablename+' values(?,?)'), (lines+1, self.combo_tain_line.currentText().split('|')[0]))
+            trainconn.commit()
+            self.trainTablere()
+            #print (lines)
+            pass
     
     #删除车辆线路
     def trainLinedel(self):
-        trainid =  self.table_train.item(self.table_train.currentRow(), 0).text()
-        lineid = self.list_train_line.currentItem().text().split('|')[0]
-        tablename = 'train_'+str(trainid)
-        traincursor.execute('select count(*) from '+tablename)
-        lines = traincursor.fetchone()[0]
-        for i in range(int(lineid), lines+1):
-            traincursor.execute(('delete from '+tablename+' where id=?'), (i, ))
-        trainconn.commit()
-        self.trainTablere()
+        if(checkUserlevel(0)):
+            trainid =  self.table_train.item(self.table_train.currentRow(), 0).text()
+            lineid = self.list_train_line.currentItem().text().split('|')[0]
+            tablename = 'train_'+str(trainid)
+            traincursor.execute('select count(*) from '+tablename)
+            lines = traincursor.fetchone()[0]
+            for i in range(int(lineid), lines+1):
+                traincursor.execute(('delete from '+tablename+' where id=?'), (i, ))
+            trainconn.commit()
+            self.trainTablere()
      
     #车辆数据同步
     def trainLinesave(self):
-        during = 0
-        cost = 0
-        trainid =  self.table_train.item(self.table_train.currentRow(), 0).text()
-        tablename = 'train_'+str(trainid)
-        traincursor.execute('select linkid from '+tablename+' order by id desc limit 0,1')
-        lastlineid = traincursor.fetchone()
-        if(lastlineid):
-            basiccursor.execute('select "to" from raillink where id=?', (lastlineid[0], ))
-            laststation = basiccursor.fetchone()[0]
+        if(checkUserlevel(0)):
+            during = 0
+            cost = 0
+            trainid =  self.table_train.item(self.table_train.currentRow(), 0).text()
+            tablename = 'train_'+str(trainid)
+            traincursor.execute('select linkid from '+tablename+' order by id desc limit 0,1')
+            lastlineid = traincursor.fetchone()
+            if(lastlineid):
+                basiccursor.execute('select "to" from raillink where id=?', (lastlineid[0], ))
+                laststation = basiccursor.fetchone()[0]
+            else:
+                laststation = "NOTSET"
+            print(laststation)
+            traincursor.execute('select * from '+tablename)
+            lines = traincursor.fetchall()
+            for l in lines:
+                basiccursor.execute('select * from raillink where id=?', (l[1], ))
+                oneline = basiccursor.fetchone()
+                during = during + oneline[3]
+                cost = cost +oneline[4]
+            links = len(lines)
+            #print(laststation, links, during, cost)
+            basiccursor.execute('select "departtime" from train where id=?', (trainid, ))
+            departtime = basiccursor.fetchone()[0]
+            arrivetime = datetime.datetime.strptime(departtime, '%H:%M:%S.000')
+            arrivetime = arrivetime+datetime.timedelta(minutes=during)
+            arivetimetext = arrivetime.strftime('%H:%M:%S.000')
+            #print(arivetimetext, laststation, links, cost)
+            basiccursor.execute('update train set "arrivetime"=?,"to"=?,"links"=?,"totalcost"=? where id=?', (arivetimetext,laststation ,links ,cost, trainid))
+            basicconn.commit()
+            self.refreshAll()
+            pass
+        
+class MyLoginDlg(Ui_Login):
+    def Login(self):
+        global userlevel
+        leveltable = {0:"管理员", 1:"工作人员", 2:"旅客"}
+        name = self.lineedit_name.text()
+        password = self.lineedit_password.text()
+        basiccursor.execute('select uid,level,username from userinfo where username=? and password=?', (name, password))
+        userinfo = basiccursor.fetchone()
+        if(userinfo):
+            MainWindow.show()
+            Dialog.close()
+            userlevel = userinfo[1]
+            if(userlevel == 1):
+                ui.tabWidget.setTabEnabled(0, False)
+            elif(userlevel > 1):
+                for i in range(0, 4):
+                    ui.tabWidget.setTabEnabled(i, False)
+            QMessageBox.information(MainWindow,"登陆成功", "欢迎，"+leveltable[userinfo[1]]+" "+userinfo[2],QMessageBox.Yes)
         else:
-            laststation = "NOTSET"
-        print(laststation)
-        traincursor.execute('select * from '+tablename)
-        lines = traincursor.fetchall()
-        for l in lines:
-            basiccursor.execute('select * from raillink where id=?', (l[1], ))
-            oneline = basiccursor.fetchone()
-            during = during + oneline[3]
-            cost = cost +oneline[4]
-        links = len(lines)
-        #print(laststation, links, during, cost)
-        basiccursor.execute('select "departtime" from train where id=?', (trainid, ))
-        departtime = basiccursor.fetchone()[0]
-        arrivetime = datetime.datetime.strptime(departtime, '%H:%M:%S.000')
-        arrivetime = arrivetime+datetime.timedelta(minutes=during)
-        arivetimetext = arrivetime.strftime('%H:%M:%S.000')
-        #print(arivetimetext, laststation, links, cost)
-        basiccursor.execute('update train set "arrivetime"=?,"to"=?,"links"=?,"totalcost"=? where id=?', (arivetimetext,laststation ,links ,cost, trainid))
-        basicconn.commit()
-        self.refreshAll()
+            QMessageBox.information(MainWindow,"提示", "用户名或密码错误",QMessageBox.Yes)
+        pass
+    
+    def Register(self):
+        pass
+        
+    def Cancel(self):
+        sys.exit(app.exec_())
         pass
 
 def stationCodeToName(code):
@@ -282,14 +327,29 @@ def stationCodeToName(code):
         basiccursor.execute('select name from station where code=?', (code, ))
         name = basiccursor.fetchone()
         return name[0]
+        
+def cityIntrain(citycode, trainid):
+    pass
+    
+def checkUserlevel(requsetlevel):
+    global userlevel
+    if(userlevel<=requsetlevel):
+        return True
+    else:
+        QMessageBox.information(MainWindow,"提示", "用户权限禁止",QMessageBox.Yes)
+        return False
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = mywindow()
+    Dialog = QtWidgets.QDialog()
+    ui = MyWindow()
+    loginDialog = MyLoginDlg()
     ui.setupUi(MainWindow)
-    MainWindow.show()
-    ui.refreshAll()
+    loginDialog.setupUi(Dialog)
+    #MainWindow.show()
+    Dialog.show()
+    #ui.refreshAll()
     sys.exit(app.exec_())
 
