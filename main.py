@@ -2,6 +2,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 from Ui_mainWindow import Ui_MainWindow
 from Ui_loginWindow import Ui_Login
+from Ui_registerWindow import Ui_Register
 import sqlite3
 import datetime
 
@@ -99,8 +100,8 @@ class MyWindow(Ui_MainWindow):
     #添加用户
     def userAdd(self):
         basiccursor.execute('select uid from userinfo order by uid desc limit 0,1')
-        lines = basiccursor.fetchone()[0]
-        basiccursor.execute('insert into userinfo values (?,?,?,NULL,?)', (lines+1,self.lineedit_user_name.text(),self.lineedit_user_password.text(),self.spin_user_level.value()))
+        maxid = basiccursor.fetchone()[0]
+        basiccursor.execute('insert into userinfo values (?,?,?,NULL,?)', (maxid+1,self.lineedit_user_name.text(),self.lineedit_user_password.text(),self.spin_user_level.value()))
         basicconn.commit()
         self.refreshAll()
 
@@ -123,8 +124,8 @@ class MyWindow(Ui_MainWindow):
     def stationAdd(self):
         if(checkUserlevel(0)):
             basiccursor.execute('select id from station order by id desc limit 0,1')
-            lines = basiccursor.fetchone()[0]
-            basiccursor.execute('insert into station values (?,?,?,?)', (lines+1,self.lineedit_station_code.text(),self.lineedit_station_name.text(),self.spin_train_type.value()))
+            maxid = basiccursor.fetchone()[0]
+            basiccursor.execute('insert into station values (?,?,?,?)', (maxid+1,self.lineedit_station_code.text(),self.lineedit_station_name.text(),self.spin_train_type.value()))
             basicconn.commit()
             self.refreshAll()
         
@@ -156,8 +157,8 @@ class MyWindow(Ui_MainWindow):
     def lineAdd(self):
         if(checkUserlevel(0)):
             basiccursor.execute('select id from raillink order by id desc limit 0,1')
-            lines = basiccursor.fetchone()[0]
-            basiccursor.execute('insert into raillink values (?,?,?,?,?)', (lines+1,self.combo_line_depart.currentText().split("|")[1],self.combo_line_arrive.currentText().split("|")[1],self.spin_line_time.value(),self.spin_line_cost.value()))
+            maxid = basiccursor.fetchone()[0]
+            basiccursor.execute('insert into raillink values (?,?,?,?,?)', (maxid+1,self.combo_line_depart.currentText().split("|")[1],self.combo_line_arrive.currentText().split("|")[1],self.spin_line_time.value(),self.spin_line_cost.value()))
             basicconn.commit()
             self.refreshAll()
  
@@ -207,11 +208,11 @@ class MyWindow(Ui_MainWindow):
     def trainAdd(self):
         if(checkUserlevel(0)):
             basiccursor.execute('select id from train order by id desc limit 0,1')
-            lines = basiccursor.fetchone()[0]
+            maxid = basiccursor.fetchone()[0]
             time = self.time_train_depart.time().toString("hh:mm:ss.000")
             basiccursor.execute('insert into train values (?,?,?,NULL,?,"NOTSET",0,0,?,?,?)',
-                (lines+1,self.lineedit_train_code.text() , time, self.combo_tain_depart.currentText().split("|")[1], self.spin_train_carriage.value(), self.spin_train_first.value(), self.spin_train_second.value()))
-            traincursor.execute('create table train_'+str(lines+1)+' ( \'id\' INT PRIMARY KEY NOT NULL, \'linkid\' INT NOT NULL ) WITHOUT ROWID')
+                (maxid+1,self.lineedit_train_code.text() , time, self.combo_tain_depart.currentText().split("|")[1], self.spin_train_carriage.value(), self.spin_train_first.value(), self.spin_train_second.value()))
+            traincursor.execute('create table train_'+str(maxid+1)+' ( \'id\' INT PRIMARY KEY NOT NULL, \'linkid\' INT NOT NULL ) WITHOUT ROWID')
             #basicconn.commit()
             #trainconn.commit()
             self.refreshAll()
@@ -301,7 +302,7 @@ class MyLoginDlg(Ui_Login):
         userinfo = basiccursor.fetchone()
         if(userinfo):
             MainWindow.show()
-            Dialog.close()
+            LoginDialog.close()
             userlevel = userinfo[1]
             if(userlevel == 1):
                 ui.tabWidget.setTabEnabled(0, False)
@@ -309,15 +310,49 @@ class MyLoginDlg(Ui_Login):
                 for i in range(0, 4):
                     ui.tabWidget.setTabEnabled(i, False)
             QMessageBox.information(MainWindow,"登陆成功", "欢迎，"+leveltable[userinfo[1]]+" "+userinfo[2],QMessageBox.Yes)
+            ui.refreshAll()
         else:
             QMessageBox.information(MainWindow,"提示", "用户名或密码错误",QMessageBox.Yes)
         pass
     
     def Register(self):
+        RegDialog.show()
         pass
         
     def Cancel(self):
         sys.exit(app.exec_())
+        pass
+
+class MyRegisterDlg(Ui_Register):
+    def Submit(self):
+        if((self.lineedit_name.text()!="") and (self.lineedit_password.text()!="")):
+            name = self.lineedit_name.text()
+            if(self.lineedit_password.text() == self.lineedit_pwconfirm.text()):
+                password = self.lineedit_password.text()
+            else:
+                QMessageBox.information(MainWindow,"提示", "两次输入密码不一致",QMessageBox.Yes)
+                return False
+            basiccursor.execute('select * from userinfo where username=?', (name,))
+            check = basiccursor.fetchone()
+            if(not check):
+                basiccursor.execute('select max(uid) from userinfo')
+                maxid = basiccursor.fetchone()[0]
+                basiccursor.execute('insert into userinfo values(?,?,?,null,?)', (maxid+1, name, password, 2))
+                basicconn.commit()
+                RegDialog.close()
+                QMessageBox.information(MainWindow,"提示", "用户 "+name+" 注册成功",QMessageBox.Yes)
+                return True
+            else:
+                QMessageBox.information(MainWindow,"提示", "用户名已被占用",QMessageBox.Yes)
+                return False
+        else:
+            QMessageBox.information(MainWindow,"提示", "用户名或密码不能为空",QMessageBox.Yes)
+            return False
+        
+        pass
+        
+    def Cancel(self):
+        RegDialog.close()
         pass
 
 def stationCodeToName(code):
@@ -343,13 +378,16 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    Dialog = QtWidgets.QDialog()
+    LoginDialog = QtWidgets.QDialog()
+    RegDialog = QtWidgets.QDialog()
     ui = MyWindow()
-    loginDialog = MyLoginDlg()
+    logindialog = MyLoginDlg()
+    regdialog = MyRegisterDlg()
     ui.setupUi(MainWindow)
-    loginDialog.setupUi(Dialog)
+    logindialog.setupUi(LoginDialog)
+    regdialog.setupUi(RegDialog)
     #MainWindow.show()
-    Dialog.show()
+    LoginDialog.show()
     #ui.refreshAll()
     sys.exit(app.exec_())
 
