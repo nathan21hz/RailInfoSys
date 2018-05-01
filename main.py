@@ -374,6 +374,11 @@ def checkUserlevel(requsetlevel):
         QMessageBox.information(MainWindow,"提示", "用户权限禁止",QMessageBox.Yes)
         return False
 
+def Initial():
+    MainWindow.setWindowIcon(QtGui.QIcon('icon.ico'))
+    LoginDialog.setWindowIcon(QtGui.QIcon('icon.ico'))
+    RegDialog.setWindowIcon(QtGui.QIcon('icon.ico'))
+
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
@@ -386,8 +391,7 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     logindialog.setupUi(LoginDialog)
     regdialog.setupUi(RegDialog)
-    #MainWindow.show()
+    Initial()
     LoginDialog.show()
-    #ui.refreshAll()
     sys.exit(app.exec_())
 
