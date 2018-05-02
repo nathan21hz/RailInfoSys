@@ -12,6 +12,7 @@ trainconn = sqlite3.connect('./DB/Train.db')
 traincursor = trainconn.cursor()
 userlevel = 0
 
+#重写主界面类
 class MyWindow(Ui_MainWindow):
     #刷新列表
     def refreshAll(self):
@@ -99,8 +100,9 @@ class MyWindow(Ui_MainWindow):
     
     #添加用户
     def userAdd(self):
-        basiccursor.execute('select uid from userinfo order by uid desc limit 0,1')
-        maxid = basiccursor.fetchone()[0]
+        basiccursor.execute('select max(uid) from userinfo')
+        maxid = basiccursor.fetchone()
+        maxid = maxid[0] if maxid[0]!=None else 0
         basiccursor.execute('insert into userinfo values (?,?,?,NULL,?)', (maxid+1,self.lineedit_user_name.text(),self.lineedit_user_password.text(),self.spin_user_level.value()))
         basicconn.commit()
         self.refreshAll()
@@ -123,8 +125,9 @@ class MyWindow(Ui_MainWindow):
     #新增车站
     def stationAdd(self):
         if(checkUserlevel(0)):
-            basiccursor.execute('select id from station order by id desc limit 0,1')
-            maxid = basiccursor.fetchone()[0]
+            basiccursor.execute('select max(id) from station')
+            maxid = basiccursor.fetchone()
+            maxid = maxid[0] if maxid[0]!=None else 0
             basiccursor.execute('insert into station values (?,?,?,?)', (maxid+1,self.lineedit_station_code.text(),self.lineedit_station_name.text(),self.spin_train_type.value()))
             basicconn.commit()
             self.refreshAll()
@@ -136,6 +139,7 @@ class MyWindow(Ui_MainWindow):
             basicconn.commit()
             self.refreshAll()
     
+    #线路列表选择动作
     def lineTablere(self):
         id =  self.table_line.item(self.table_line.currentRow(), 0).text()
         basiccursor.execute('select * from raillink where id=?', (id, ))
@@ -146,6 +150,7 @@ class MyWindow(Ui_MainWindow):
         self.spin_line_time.setValue(oneline[3])
         self.spin_line_cost.setValue(oneline[4])
     
+    #编辑线路
     def lineEdit(self):
         if(checkUserlevel(0)):
             id =  self.table_line.item(self.table_line.currentRow(), 0).text()
@@ -156,8 +161,9 @@ class MyWindow(Ui_MainWindow):
     #添加线路
     def lineAdd(self):
         if(checkUserlevel(0)):
-            basiccursor.execute('select id from raillink order by id desc limit 0,1')
-            maxid = basiccursor.fetchone()[0]
+            basiccursor.execute('select max(id) from raillink')
+            maxid = basiccursor.fetchone()
+            maxid = maxid[0] if maxid[0]!=None else 0
             basiccursor.execute('insert into raillink values (?,?,?,?,?)', (maxid+1,self.combo_line_depart.currentText().split("|")[1],self.combo_line_arrive.currentText().split("|")[1],self.spin_line_time.value(),self.spin_line_cost.value()))
             basicconn.commit()
             self.refreshAll()
@@ -200,21 +206,22 @@ class MyWindow(Ui_MainWindow):
             self.combo_tain_line.addItem(str(n[0])+'|'+stationCodeToName(n[1])+'-'+stationCodeToName(n[2]))
         pass
     
-    #线路列表选择动作
+    #列车线路列表选择动作
     def trainListre(self):
         pass
     
     #添加车辆
     def trainAdd(self):
         if(checkUserlevel(0)):
-            basiccursor.execute('select id from train order by id desc limit 0,1')
-            maxid = basiccursor.fetchone()[0]
+            basiccursor.execute('select max(id) from train')
+            maxid = basiccursor.fetchone()
+            maxid = maxid[0] if maxid[0]!=None else 0
             time = self.time_train_depart.time().toString("hh:mm:ss.000")
             basiccursor.execute('insert into train values (?,?,?,NULL,?,"NOTSET",0,0,?,?,?)',
                 (maxid+1,self.lineedit_train_code.text() , time, self.combo_tain_depart.currentText().split("|")[1], self.spin_train_carriage.value(), self.spin_train_first.value(), self.spin_train_second.value()))
             traincursor.execute('create table train_'+str(maxid+1)+' ( \'id\' INT PRIMARY KEY NOT NULL, \'linkid\' INT NOT NULL ) WITHOUT ROWID')
-            #basicconn.commit()
-            #trainconn.commit()
+            basicconn.commit()
+            trainconn.commit()
             self.refreshAll()
             pass
     
@@ -291,7 +298,8 @@ class MyWindow(Ui_MainWindow):
             basicconn.commit()
             self.refreshAll()
             pass
-        
+
+#重写登陆窗口类            
 class MyLoginDlg(Ui_Login):
     def Login(self):
         global userlevel
@@ -323,6 +331,7 @@ class MyLoginDlg(Ui_Login):
         sys.exit(app.exec_())
         pass
 
+#重写注册窗口类
 class MyRegisterDlg(Ui_Register):
     def Submit(self):
         if((self.lineedit_name.text()!="") and (self.lineedit_password.text()!="")):
@@ -336,7 +345,8 @@ class MyRegisterDlg(Ui_Register):
             check = basiccursor.fetchone()
             if(not check):
                 basiccursor.execute('select max(uid) from userinfo')
-                maxid = basiccursor.fetchone()[0]
+                maxid = basiccursor.fetchone()
+                maxid = maxid[0] if maxid[0]!=None else 0
                 basiccursor.execute('insert into userinfo values(?,?,?,null,?)', (maxid+1, name, password, 2))
                 basicconn.commit()
                 RegDialog.close()
@@ -355,6 +365,7 @@ class MyRegisterDlg(Ui_Register):
         RegDialog.close()
         pass
 
+#通过车站代码查询并返回车站名
 def stationCodeToName(code):
     if(code == 'NOTSET'):
         return "暂未设置"
@@ -362,10 +373,12 @@ def stationCodeToName(code):
         basiccursor.execute('select name from station where code=?', (code, ))
         name = basiccursor.fetchone()
         return name[0]
-        
+
+#判断列车是否经过某城市        
 def cityIntrain(citycode, trainid):
     pass
-    
+
+#检查用户权限    
 def checkUserlevel(requsetlevel):
     global userlevel
     if(userlevel<=requsetlevel):
@@ -374,6 +387,7 @@ def checkUserlevel(requsetlevel):
         QMessageBox.information(MainWindow,"提示", "用户权限禁止",QMessageBox.Yes)
         return False
 
+#初始化
 def Initial():
     MainWindow.setWindowIcon(QtGui.QIcon('icon.ico'))
     LoginDialog.setWindowIcon(QtGui.QIcon('icon.ico'))
