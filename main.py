@@ -305,7 +305,8 @@ class MyWindow(Ui_MainWindow):
             basicconn.commit()
             self.refreshAll()
             pass
-            
+    
+    #车票查询
     def ticketQuery(self):
         basiccursor.execute('select id from train')
         trains = basiccursor.fetchall()
@@ -316,12 +317,7 @@ class MyWindow(Ui_MainWindow):
             if(cityIntrain(self.combo_ticket_depart.currentText().split("|")[1], trainid,1)):
                 if(cityIntrain(self.combo_ticket_arrive.currentText().split("|")[1], trainid,2)):
                     trainlist.append(trainid)
-                    #basiccursor.execute('select "code","departtime","totalcost","from","to" from train where id=')
-                    pass
-                pass
-            pass
-        pass
-        print(trainlist)
+        #print(trainlist)
         lines = len(trainlist)
         self.table_ticket.setRowCount(lines)
         forquerylist = ""
@@ -336,6 +332,9 @@ class MyWindow(Ui_MainWindow):
         for index, tt in enumerate(traintable):
             for i in range(0, 3):
                 self.table_ticket.setItem(index,i, QtWidgets.QTableWidgetItem(str(tt[i])))
+        for l in range(lines):
+            temp = "否" if  ((self.table_ticket.item(l, 3).text() == self.combo_ticket_depart.currentText().split("|")[0]) and (self.table_ticket.item(l, 4).text() == self.combo_ticket_arrive.currentText().split("|")[0])) else "是"
+            self.table_ticket.setItem(l,5, QtWidgets.QTableWidgetItem(temp))
 
 #重写登陆窗口类            
 class MyLoginDlg(Ui_Login):
