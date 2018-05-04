@@ -14,5 +14,5 @@ For coursework of Railway Information Systerm
 - [x] Train Timetable Management
 - [x] Ticket Price & Duration Auto Calculation
 - [x] One-Way Ticket Query
-- [ ] Transfer Ticket Query
+- [x] Transfer Ticket Query
 - [ ] Book Ticket & Seats Auto Calculation
