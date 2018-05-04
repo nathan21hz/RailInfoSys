@@ -74,6 +74,13 @@ class MyWindow(Ui_MainWindow):
             for s in stations:
                 self.combo_tain_depart.addItem(s[2]+'|'+s[1])
         elif(page == 4):
+            self.combo_ticket_depart.clear()
+            self.combo_ticket_arrive.clear()
+            basiccursor.execute('select * from station')
+            stations = basiccursor.fetchall()
+            for s in stations:
+                self.combo_ticket_depart.addItem(s[2]+'|'+s[1])
+                self.combo_ticket_arrive.addItem(s[2]+'|'+s[1])
             pass
         pass
         
@@ -298,6 +305,37 @@ class MyWindow(Ui_MainWindow):
             basicconn.commit()
             self.refreshAll()
             pass
+            
+    def ticketQuery(self):
+        basiccursor.execute('select id from train')
+        trains = basiccursor.fetchall()
+        self.table_ticket.clearContents()
+        trainlist = []
+        for t in trains:
+            trainid = t[0]
+            if(cityIntrain(self.combo_ticket_depart.currentText().split("|")[1], trainid,1)):
+                if(cityIntrain(self.combo_ticket_arrive.currentText().split("|")[1], trainid,2)):
+                    trainlist.append(trainid)
+                    #basiccursor.execute('select "code","departtime","totalcost","from","to" from train where id=')
+                    pass
+                pass
+            pass
+        pass
+        print(trainlist)
+        lines = len(trainlist)
+        self.table_ticket.setRowCount(lines)
+        forquerylist = ""
+        for tl in trainlist:
+            forquerylist = forquerylist + str(tl)+","
+        forquerylist = forquerylist[0:-1]
+        basiccursor.execute('select "code","departtime","totalcost","from","to" from train where id in ('+forquerylist+')')
+        traintable = basiccursor.fetchall()
+        for index, tt in enumerate(traintable):
+            for i in range(3, 5):
+                self.table_ticket.setItem(index,i, QtWidgets.QTableWidgetItem(stationCodeToName(tt[i])))
+        for index, tt in enumerate(traintable):
+            for i in range(0, 3):
+                self.table_ticket.setItem(index,i, QtWidgets.QTableWidgetItem(str(tt[i])))
 
 #重写登陆窗口类            
 class MyLoginDlg(Ui_Login):
@@ -374,8 +412,31 @@ def stationCodeToName(code):
         name = basiccursor.fetchone()
         return name[0]
 
-#判断列车是否经过某城市        
-def cityIntrain(citycode, trainid):
+#判断列车是否经过某城市 
+#mode 1 :始发 mode 2:终到
+def cityIntrain(citycode, trainid, mode):
+    if(mode == 1):
+        tablename = "train_"+str(trainid)
+        traincursor.execute('select * from '+tablename)
+        links = traincursor.fetchall()
+        for l in links:
+            basiccursor.execute('select * from raillink where id=?', (l[1], ))
+            link = basiccursor.fetchone()
+            if(link[1]==citycode):
+                return True
+            pass
+        return False
+    elif(mode == 2):
+        tablename = "train_"+str(trainid)
+        traincursor.execute('select * from '+tablename)
+        links = traincursor.fetchall()
+        for l in links:
+            basiccursor.execute('select * from raillink where id=?', (l[1], ))
+            link = basiccursor.fetchone()
+            if(link[2]==citycode):
+                return True
+            pass
+        return False
     pass
 
 #检查用户权限    
