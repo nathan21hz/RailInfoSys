@@ -95,24 +95,33 @@ class MyWindow(Ui_MainWindow):
     
     #用户信息编辑
     def userEdit(self):
-        basiccursor.execute('update userinfo set username=?,password=?,level=? where uid=?', (self.lineedit_user_name.text(), self.lineedit_user_password.text(),self.spin_user_level.value() ,self.lineedit_user_uid.text()))
-        basicconn.commit()
-        self.refreshAll()
+        if(self.lineedit_user_uid.text()):
+            basiccursor.execute('update userinfo set username=?,password=?,level=? where uid=?', (self.lineedit_user_name.text(), self.lineedit_user_password.text(),self.spin_user_level.value() ,self.lineedit_user_uid.text()))
+            basicconn.commit()
+            self.refreshAll()
+        else:
+            QMessageBox.information(MainWindow,"提示", "请先选择要修改的用户",QMessageBox.Yes)
     
     #删除用户
     def userDel(self):
-        basiccursor.execute('delete from userinfo where uid=?', (self.lineedit_user_uid.text()))
-        basicconn.commit()
-        self.refreshAll()
+        if(self.lineedit_user_uid.text()):
+            basiccursor.execute('delete from userinfo where uid=?', (self.lineedit_user_uid.text()))
+            basicconn.commit()
+            self.refreshAll()
+        else:
+            QMessageBox.information(MainWindow,"提示", "请先选择要删除的用户",QMessageBox.Yes)
     
     #添加用户
     def userAdd(self):
-        basiccursor.execute('select max(uid) from userinfo')
-        maxid = basiccursor.fetchone()
-        maxid = maxid[0] if maxid[0]!=None else 0
-        basiccursor.execute('insert into userinfo values (?,?,?,NULL,?)', (maxid+1,self.lineedit_user_name.text(),self.lineedit_user_password.text(),self.spin_user_level.value()))
-        basicconn.commit()
-        self.refreshAll()
+        if(self.lineedit_user_name.text() and self.lineedit_user_password.text()):
+            basiccursor.execute('select max(uid) from userinfo')
+            maxid = basiccursor.fetchone()
+            maxid = maxid[0] if maxid[0]!=None else 0
+            basiccursor.execute('insert into userinfo values (?,?,?,NULL,?)', (maxid+1,self.lineedit_user_name.text(),self.lineedit_user_password.text(),self.spin_user_level.value()))
+            basicconn.commit()
+            self.refreshAll()
+        else:
+            QMessageBox.information(MainWindow,"提示", "用户名或密码不能为空",QMessageBox.Yes)
 
     #车站选择列表动作
     def stationListre(self):
@@ -125,26 +134,35 @@ class MyWindow(Ui_MainWindow):
     #编辑车站
     def stationEdit(self):
         if(checkUserlevel(0)):
-            basiccursor.execute('update station set code=?,name=?,type=? where id=?', (self.lineedit_station_code.text(), self.lineedit_station_name.text(),self.spin_train_type.value() ,self.list_station_list.currentItem().text().split("|")[0]))
-            basicconn.commit()
-            self.refreshAll()
+            if(self.list_station_list.currentItem()):
+                basiccursor.execute('update station set code=?,name=?,type=? where id=?', (self.lineedit_station_code.text(), self.lineedit_station_name.text(),self.spin_train_type.value() ,self.list_station_list.currentItem().text().split("|")[0]))
+                basicconn.commit()
+                self.refreshAll()
+            else:
+                QMessageBox.information(MainWindow,"提示", "请先选择要编辑的车站",QMessageBox.Yes)
         
     #新增车站
     def stationAdd(self):
         if(checkUserlevel(0)):
-            basiccursor.execute('select max(id) from station')
-            maxid = basiccursor.fetchone()
-            maxid = maxid[0] if maxid[0]!=None else 0
-            basiccursor.execute('insert into station values (?,?,?,?)', (maxid+1,self.lineedit_station_code.text(),self.lineedit_station_name.text(),self.spin_train_type.value()))
-            basicconn.commit()
-            self.refreshAll()
+            if(self.lineedit_station_code.text() and self.lineedit_station_name.text()):
+                basiccursor.execute('select max(id) from station')
+                maxid = basiccursor.fetchone()
+                maxid = maxid[0] if maxid[0]!=None else 0
+                basiccursor.execute('insert into station values (?,?,?,?)', (maxid+1,self.lineedit_station_code.text(),self.lineedit_station_name.text(),self.spin_train_type.value()))
+                basicconn.commit()
+                self.refreshAll()
+            else:
+                QMessageBox.information(MainWindow,"提示", "车站代码或车站名不能为空",QMessageBox.Yes)
         
     #删除车站
     def stationDel(self):
         if(checkUserlevel(0)):
-            basiccursor.execute('delete from station where id=?', (self.list_station_list.currentItem().text().split("|")[0], ))
-            basicconn.commit()
-            self.refreshAll()
+            if(self.list_station_list.currentItem()):
+                basiccursor.execute('delete from station where id=?', (self.list_station_list.currentItem().text().split("|")[0], ))
+                basicconn.commit()
+                self.refreshAll()
+            else:
+                QMessageBox.information(MainWindow,"提示", "请先选择要删除的车站",QMessageBox.Yes)
     
     #线路列表选择动作
     def lineTablere(self):
@@ -160,10 +178,13 @@ class MyWindow(Ui_MainWindow):
     #编辑线路
     def lineEdit(self):
         if(checkUserlevel(0)):
-            id =  self.table_line.item(self.table_line.currentRow(), 0).text()
-            basiccursor.execute('update raillink set time=?,cost=? where id=?', (self.spin_line_time.value(), self.spin_line_cost.value(), id))
-            basicconn.commit()
-            self.refreshAll()
+            if(self.table_line.currentRow()!=-1):
+                id =  self.table_line.item(self.table_line.currentRow(), 0).text()
+                basiccursor.execute('update raillink set time=?,cost=? where id=?', (self.spin_line_time.value(), self.spin_line_cost.value(), id))
+                basicconn.commit()
+                self.refreshAll()
+            else:
+                QMessageBox.information(MainWindow,"提示", "请先选择要编辑的线路",QMessageBox.Yes)
         
     #添加线路
     def lineAdd(self):
@@ -178,10 +199,13 @@ class MyWindow(Ui_MainWindow):
     #删除线路 
     def lineDel(self):
         if(checkUserlevel(0)):
-            id =  self.table_line.item(self.table_line.currentRow(), 0).text()
-            basiccursor.execute('delete from raillink where id=?', (id, ))
-            basicconn.commit()
-            self.refreshAll()
+            if(self.table_line.currentRow()!=-1):
+                id =  self.table_line.item(self.table_line.currentRow(), 0).text()
+                basiccursor.execute('delete from raillink where id=?', (id, ))
+                basicconn.commit()
+                self.refreshAll()
+            else:
+                QMessageBox.information(MainWindow,"提示", "请先选择要删除的线路",QMessageBox.Yes)
         
     #车辆列表选择动作
     def trainTablere(self):
@@ -220,34 +244,40 @@ class MyWindow(Ui_MainWindow):
     #添加车辆
     def trainAdd(self):
         if(checkUserlevel(0)):
-            basiccursor.execute('select max(id) from train')
-            maxid = basiccursor.fetchone()
-            maxid = maxid[0] if maxid[0]!=None else 0
-            time = self.time_train_depart.time().toString("hh:mm:ss.000")
-            basiccursor.execute('insert into train values (?,?,?,NULL,?,"NOTSET",0,0,?,?,?)',
-                (maxid+1,self.lineedit_train_code.text() , time, self.combo_tain_depart.currentText().split("|")[1], self.spin_train_carriage.value(), self.spin_train_first.value(), self.spin_train_second.value()))
-            traincursor.execute('create table train_'+str(maxid+1)+' ( \'id\' INT PRIMARY KEY NOT NULL, \'linkid\' INT NOT NULL ) WITHOUT ROWID')
-            basicconn.commit()
-            trainconn.commit()
-            self.refreshAll()
+            if(self.lineedit_train_code.text()):
+                basiccursor.execute('select max(id) from train')
+                maxid = basiccursor.fetchone()
+                maxid = maxid[0] if maxid[0]!=None else 0
+                time = self.time_train_depart.time().toString("hh:mm:ss.000")
+                basiccursor.execute('insert into train values (?,?,?,NULL,?,"NOTSET",0,0,?,?,?)',
+                    (maxid+1,self.lineedit_train_code.text() , time, self.combo_tain_depart.currentText().split("|")[1], self.spin_train_carriage.value(), self.spin_train_first.value(), self.spin_train_second.value()))
+                traincursor.execute('create table train_'+str(maxid+1)+' ( \'id\' INT PRIMARY KEY NOT NULL, \'linkid\' INT NOT NULL ) WITHOUT ROWID')
+                basicconn.commit()
+                trainconn.commit()
+                self.refreshAll()
+            else:
+                QMessageBox.information(MainWindow,"提示", "车次号不能为空",QMessageBox.Yes)
             pass
     
     #删除车辆
     def trainDel(self):
         if(checkUserlevel(0)):
-            self.list_train_line.clear()
-            self.combo_tain_line.clear()
-            id =  self.table_train.item(self.table_train.currentRow(), 0).text()
-            traincursor.execute('drop table train_'+str(id))
-            basiccursor.execute('delete from train where id=?', (id, ))
-            basicconn.commit()
-            trainconn.commit()
-            self.refreshAll()
+            if(self.table_train.currentRow()!=-1):
+                self.list_train_line.clear()
+                self.combo_tain_line.clear()
+                id =  self.table_train.item(self.table_train.currentRow(), 0).text()
+                traincursor.execute('drop table train_'+str(id))
+                basiccursor.execute('delete from train where id=?', (id, ))
+                basicconn.commit()
+                trainconn.commit()
+                self.refreshAll()
+            else:
+                QMessageBox.information(MainWindow,"提示", "请先选择要删除的车辆",QMessageBox.Yes)
             pass
         
     #添加车辆线路
     def trainLineadd(self):
-        if(checkUserlevel(0)):
+        if(checkUserlevel(0) and self.table_train.currentRow()!=-1):
             id =  self.table_train.item(self.table_train.currentRow(), 0).text()
             tablename = 'train_'+str(id)
             traincursor.execute('select count(*) from '+tablename)
@@ -260,20 +290,23 @@ class MyWindow(Ui_MainWindow):
     
     #删除车辆线路
     def trainLinedel(self):
-        if(checkUserlevel(0)):
+        if(checkUserlevel(0) and self.table_train.currentRow()!=-1):
             trainid =  self.table_train.item(self.table_train.currentRow(), 0).text()
-            lineid = self.list_train_line.currentItem().text().split('|')[0]
-            tablename = 'train_'+str(trainid)
-            traincursor.execute('select count(*) from '+tablename)
-            lines = traincursor.fetchone()[0]
-            for i in range(int(lineid), lines+1):
-                traincursor.execute(('delete from '+tablename+' where id=?'), (i, ))
-            trainconn.commit()
-            self.trainTablere()
+            if(self.list_train_line.currentItem()):
+                lineid = self.list_train_line.currentItem().text().split('|')[0]
+                tablename = 'train_'+str(trainid)
+                traincursor.execute('select count(*) from '+tablename)
+                lines = traincursor.fetchone()[0]
+                for i in range(int(lineid), lines+1):
+                    traincursor.execute(('delete from '+tablename+' where id=?'), (i, ))
+                trainconn.commit()
+                self.trainTablere()
+            else:
+                QMessageBox.information(MainWindow,"提示", "请先选择要删除的线路",QMessageBox.Yes)
      
     #车辆数据同步
     def trainLinesave(self):
-        if(checkUserlevel(0)):
+        if(checkUserlevel(0) and self.table_train.currentRow()!=-1):
             during = 0
             cost = 0
             trainid =  self.table_train.item(self.table_train.currentRow(), 0).text()

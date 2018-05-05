@@ -13,5 +13,6 @@ build
 __pycache__
 _eric6project
 *.e4p
+*.spec
 
 # My configurations:

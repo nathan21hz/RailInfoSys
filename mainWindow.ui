@@ -30,7 +30,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_user">
      <attribute name="title">
@@ -202,7 +202,7 @@
       <widget class="QPushButton" name="button_user_del">
        <property name="geometry">
         <rect>
-         <x>170</x>
+         <x>150</x>
          <y>390</y>
          <width>131</width>
          <height>51</height>
@@ -414,7 +414,7 @@
       <widget class="QPushButton" name="button_station_del">
        <property name="geometry">
         <rect>
-         <x>170</x>
+         <x>160</x>
          <y>330</y>
          <width>131</width>
          <height>51</height>
