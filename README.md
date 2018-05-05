@@ -3,7 +3,7 @@ For coursework of Railway Information Systerm
 
 ## Using
 - Python 3.5
-- SQLite3 For Database
+- SQLite3 for Database
 - PyQt5 for GUI  
 
 ## Function List  
@@ -15,4 +15,5 @@ For coursework of Railway Information Systerm
 - [x] Ticket Price & Duration Auto Calculation
 - [x] One-Way Ticket Query
 - [x] Transfer Ticket Query
+- [x] Actual During Time and Cost Query for One-Way and Transfer
 - [ ] Book Ticket & Seats Auto Calculation

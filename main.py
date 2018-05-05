@@ -285,7 +285,7 @@ class MyWindow(Ui_MainWindow):
                 laststation = basiccursor.fetchone()[0]
             else:
                 laststation = "NOTSET"
-            print(laststation)
+            #print(laststation)
             traincursor.execute('select * from '+tablename)
             lines = traincursor.fetchall()
             for l in lines:
@@ -309,18 +309,9 @@ class MyWindow(Ui_MainWindow):
     #车票查询
     def ticketQuery(self):
         self.table_ticket.clearContents()
+        self.table_ticket.setRowCount(0)
         if(self.checkBox.checkState()==0):
-            basiccursor.execute('select id from train')
-            trains = basiccursor.fetchall()
-            trainlist = []
-            for t in trains:
-                trainid = t[0]
-                isdepartin,departid=cityIntrain(self.combo_ticket_depart.currentText().split("|")[1], trainid,1)
-                if(isdepartin):
-                    isarrivein,arriveid=cityIntrain(self.combo_ticket_arrive.currentText().split("|")[1], trainid,2)
-                    if(isarrivein):
-                        if(arriveid>departid):
-                            trainlist.append(trainid)
+            trainlist = oneWayQuery(self.combo_ticket_depart.currentText().split("|")[1], self.combo_ticket_arrive.currentText().split("|")[1])
             #print(trainlist)
             lines = len(trainlist)
             self.table_ticket.setRowCount(lines)
@@ -328,7 +319,7 @@ class MyWindow(Ui_MainWindow):
             for tl in trainlist:
                 forquerylist = forquerylist + str(tl)+","
             forquerylist = forquerylist[0:-1]
-            basiccursor.execute('select "code","departtime","totalcost","from","to" from train where id in ('+forquerylist+')')
+            basiccursor.execute('select "code","departtime","totalcost","from","to","id" from train where id in ('+forquerylist+')')
             traintable = basiccursor.fetchall()
             for index, tt in enumerate(traintable):
                 for i in range(3, 5):
@@ -338,7 +329,11 @@ class MyWindow(Ui_MainWindow):
                     self.table_ticket.setItem(index,i, QtWidgets.QTableWidgetItem(str(tt[i])))
             for l in range(lines):
                 temp = "否" if  ((self.table_ticket.item(l, 3).text() == self.combo_ticket_depart.currentText().split("|")[0]) and (self.table_ticket.item(l, 4).text() == self.combo_ticket_arrive.currentText().split("|")[0])) else "是"
-                self.table_ticket.setItem(l,5, QtWidgets.QTableWidgetItem(temp))
+                self.table_ticket.setItem(l,7, QtWidgets.QTableWidgetItem(temp))
+            for index, tt in enumerate(traintable):
+                temp = partTimecost(tt[5],self.combo_ticket_depart.currentText().split("|")[1], self.combo_ticket_arrive.currentText().split("|")[1])
+                self.table_ticket.setItem(index,5, QtWidgets.QTableWidgetItem(str(temp["cost"])))
+                self.table_ticket.setItem(index,6, QtWidgets.QTableWidgetItem(str(temp["during"])))
         else:
             transfers = transferTicketQuery(self.combo_ticket_depart.currentText().split("|")[1],self.combo_ticket_arrive.currentText().split("|")[1])
             plancount = len(transfers)
@@ -346,18 +341,30 @@ class MyWindow(Ui_MainWindow):
             for index, t in enumerate(transfers):
                 basiccursor.execute('select "code","departtime","totalcost","from","to" from train where id=?', (t["line1"], ))
                 line1 = basiccursor.fetchone()
+                temp1 = partTimecost(t["line1"], self.combo_ticket_depart.currentText().split("|")[1], t["transcity"])
+                temp2 = partTimecost(t["line2"], t["transcity"], self.combo_ticket_arrive.currentText().split("|")[1])
+                
                 for i in range(3, 5):
                     self.table_ticket.setItem(index*3+1,i, QtWidgets.QTableWidgetItem(stationCodeToName(line1[i])))
                 for i in range(0, 3):
                     self.table_ticket.setItem(index*3+1,i, QtWidgets.QTableWidgetItem(str(line1[i])))
+                self.table_ticket.setItem(index*3+1,5, QtWidgets.QTableWidgetItem(str(temp1["cost"])))
+                self.table_ticket.setItem(index*3+1,6, QtWidgets.QTableWidgetItem(str(temp1["during"])))
+                
                 basiccursor.execute('select "code","departtime","totalcost","from","to" from train where id=?', (t["line2"], ))
                 line2 = basiccursor.fetchone()
                 for i in range(3, 5):
                     self.table_ticket.setItem(index*3+2,i, QtWidgets.QTableWidgetItem(stationCodeToName(line2[i])))
                 for i in range(0, 3):
                     self.table_ticket.setItem(index*3+2,i, QtWidgets.QTableWidgetItem(str(line2[i])))
-                self.table_ticket.setSpan(index*3, 0, 1, 6)
-                self.table_ticket.setItem(index*3,0, QtWidgets.QTableWidgetItem("方案"+str(index+1)+"  换乘站："+stationCodeToName(t["transcity"])))
+                self.table_ticket.setItem(index*3+2,5, QtWidgets.QTableWidgetItem(str(temp2["cost"])))
+                self.table_ticket.setItem(index*3+2,6, QtWidgets.QTableWidgetItem(str(temp2["during"])))
+                
+                self.table_ticket.setSpan(index*3, 0, 1, 8)
+                totalcost = temp1["cost"]+temp2["cost"]
+                totalduring = temp1["during"]+temp2["during"]
+                titleline = "方案"+str(index+1)+"    换乘站："+stationCodeToName(t["transcity"])+"    实际费用合计："+str(totalcost)+"元    总历时："+str(totalduring)+"分钟"
+                self.table_ticket.setItem(index*3,0, QtWidgets.QTableWidgetItem(titleline))
                 
                 
 
@@ -447,9 +454,9 @@ def cityIntrain(citycode, trainid, mode):
             basiccursor.execute('select * from raillink where id=?', (l[1], ))
             link = basiccursor.fetchone()
             if(link[1]==citycode):
-                return True,l[0]
+                return {"status":True,"seq":l[0]}
             pass
-        return False,0
+        return {"status":False,"seq":None}
     elif(mode == 2):
         tablename = "train_"+str(trainid)
         traincursor.execute('select * from '+tablename)
@@ -458,24 +465,24 @@ def cityIntrain(citycode, trainid, mode):
             basiccursor.execute('select * from raillink where id=?', (l[1], ))
             link = basiccursor.fetchone()
             if(link[2]==citycode):
-                return True,l[0]
+                return {"status":True,"seq":l[0]}
             pass
-        return False,0
+        return {"status":False,"seq":None}
     pass
     
-#返回经过某站的所有列车
+#返回经过某站的所有列车（返回字典 id : seq）
 def trainThroughcity(citycode):
     traindict = dict()
     basiccursor.execute('select * from train')
     trains = basiccursor.fetchall()
     for t in trains:
-        isin, seq = cityIntrain(citycode, t[0],1 )
-        if(isin):
-            traindict[t[0]]=seq
+        temp = cityIntrain(citycode, t[0],1 )
+        if(temp["status"]):
+            traindict[t[0]]=temp["seq"]
     #print(traindict)
     return traindict
     
-#返回某列车后续所有站code
+#返回某列车后续所有站code（返回列表 code）
 def cityFollow(trainid, seq):
     citylist = []
     tablename = "train_"+str(trainid)
@@ -489,7 +496,22 @@ def cityFollow(trainid, seq):
     return citylist
     pass
 
-#l联程搜索
+#单程搜索（返回列表）
+def oneWayQuery(depart, arrive):
+    basiccursor.execute('select id from train')
+    trains = basiccursor.fetchall()
+    trainlist = []
+    for t in trains:
+        trainid = t[0]
+        temp1=cityIntrain(depart, trainid,1)
+        if(temp1["status"]):
+            temp2 = cityIntrain(arrive, trainid,2)
+            if(temp2["status"]):
+                if(temp1["seq"]<=temp2["seq"]):
+                    trainlist.append(trainid)
+    return trainlist
+    
+#联程搜索（返回列表 字典）
 def transferTicketQuery(depart, arrive):
     transferlist = []
     firstlines = trainThroughcity(depart)
@@ -502,6 +524,29 @@ def transferTicketQuery(depart, arrive):
                     transferlist.append({"line1":line1, "transcity":transcity, "line2":line2})
     return transferlist
     pass
+    
+#某列车两站间时间/费用（返回字典）
+def partTimecost(trainid, depart, arrive):
+    departtemp = cityIntrain(depart, trainid, 1)
+    arrivetemp = cityIntrain(arrive, trainid, 2)
+    during = 0
+    cost = 0
+    if(departtemp["status"] and arrivetemp["status"] and (departtemp["seq"]<=arrivetemp["seq"])):
+        tablename = "train_"+str(trainid)
+        traincursor.execute('select * from '+tablename+' where (id>=? and id<=?)', (departtemp["seq"], arrivetemp["seq"]))
+        lines = traincursor.fetchall()
+        for l in lines:
+            basiccursor.execute('select * from raillink where id=?', (l[1], ))
+            oneline = basiccursor.fetchone()
+            during = during + oneline[3]
+            cost = cost +oneline[4]
+        pass
+        #print({"status":True, "during":during, "cost":cost})
+        return {"status":True, "during":during, "cost":cost}
+    else:
+        return {"status":False, "during":None, "cost":None}
+    pass
+
 #检查用户权限    
 def checkUserlevel(requsetlevel):
     global userlevel

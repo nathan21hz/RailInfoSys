@@ -1177,6 +1177,16 @@
       </column>
       <column>
        <property name="text">
+        <string>实际票价</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>历时</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>过路车</string>
        </property>
       </column>
