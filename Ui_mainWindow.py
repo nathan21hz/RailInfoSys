@@ -375,6 +375,42 @@ class Ui_MainWindow(object):
         self.pushButton.setGeometry(QtCore.QRect(620, 20, 101, 41))
         self.pushButton.setObjectName("pushButton")
         self.tabWidget.addTab(self.tab_ticket, "")
+        self.tab = QtWidgets.QWidget()
+        self.tab.setObjectName("tab")
+        self.frame = QtWidgets.QFrame(self.tab)
+        self.frame.setGeometry(QtCore.QRect(60, 60, 631, 411))
+        self.frame.setFrameShape(QtWidgets.QFrame.Box)
+        self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame.setLineWidth(3)
+        self.frame.setMidLineWidth(0)
+        self.frame.setObjectName("frame")
+        self.label_29 = QtWidgets.QLabel(self.frame)
+        self.label_29.setGeometry(QtCore.QRect(10, 30, 611, 71))
+        font = QtGui.QFont()
+        font.setPointSize(20)
+        self.label_29.setFont(font)
+        self.label_29.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_29.setObjectName("label_29")
+        self.line_2 = QtWidgets.QFrame(self.frame)
+        self.line_2.setGeometry(QtCore.QRect(40, 90, 561, 16))
+        self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_2.setObjectName("line_2")
+        self.label_30 = QtWidgets.QLabel(self.frame)
+        self.label_30.setGeometry(QtCore.QRect(50, 100, 541, 181))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_30.setFont(font)
+        self.label_30.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_30.setObjectName("label_30")
+        self.label_31 = QtWidgets.QLabel(self.frame)
+        self.label_31.setGeometry(QtCore.QRect(10, 360, 611, 21))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.label_31.setFont(font)
+        self.label_31.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_31.setObjectName("label_31")
+        self.tabWidget.addTab(self.tab, "")
         MainWindow.setCentralWidget(self.centralWidget)
 
         self.retranslateUi(MainWindow)
@@ -508,6 +544,15 @@ class Ui_MainWindow(object):
         self.label_28.setText(_translate("MainWindow", "搜索结果："))
         self.pushButton.setText(_translate("MainWindow", "查询"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_ticket), _translate("MainWindow", "车票查询"))
+        self.label_29.setText(_translate("MainWindow", "铁路信息查询系统"))
+        self.label_30.setText(_translate("MainWindow", "V1.0\n"
+"\n"
+"By 崔乃川\n"
+"No. 2015111573\n"
+"电子2015-02班\n"
+"铁路信息系统架构课程设计"))
+        self.label_31.setText(_translate("MainWindow", "©2018.5 Nathan Cui "))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "关于"))
 
 
 if __name__ == "__main__":
