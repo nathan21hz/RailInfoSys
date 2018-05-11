@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 from Ui_mainWindow import Ui_MainWindow
 from Ui_loginWindow import Ui_Login
@@ -460,7 +460,6 @@ class MyRegisterDlg(Ui_Register):
         else:
             QMessageBox.information(MainWindow,"提示", "用户名或密码不能为空",QMessageBox.Yes)
             return False
-        
         pass
         
     def Cancel(self):
@@ -610,4 +609,3 @@ if __name__ == "__main__":
     Initial()
     LoginDialog.show()
     sys.exit(app.exec_())
-

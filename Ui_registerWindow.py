@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\Coding\RailwayInfoSys\registerWindow.ui'
 #
-# Created by: PyQt5 UI code generator 5.6
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,6 +12,8 @@ class Ui_Register(object):
     def setupUi(self, Register):
         Register.setObjectName("Register")
         Register.resize(400, 300)
+        Register.setMinimumSize(QtCore.QSize(400, 300))
+        Register.setMaximumSize(QtCore.QSize(400, 300))
         font = QtGui.QFont()
         font.setFamily("微软雅黑")
         font.setPointSize(11)

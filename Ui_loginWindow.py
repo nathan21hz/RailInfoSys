@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\Coding\RailwayInfoSys\loginWindow.ui'
 #
-# Created by: PyQt5 UI code generator 5.6
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,6 +12,8 @@ class Ui_Login(object):
     def setupUi(self, Login):
         Login.setObjectName("Login")
         Login.resize(330, 220)
+        Login.setMinimumSize(QtCore.QSize(330, 220))
+        Login.setMaximumSize(QtCore.QSize(330, 220))
         font = QtGui.QFont()
         font.setFamily("微软雅黑")
         font.setPointSize(11)
@@ -50,19 +52,19 @@ class Ui_Login(object):
         self.label_4.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.label_4.setAlignment(QtCore.Qt.AlignCenter)
         self.label_4.setObjectName("label_4")
-        self.widget = QtWidgets.QWidget(Login)
-        self.widget.setGeometry(QtCore.QRect(40, 160, 251, 30))
-        self.widget.setObjectName("widget")
-        self.gridLayout_2 = QtWidgets.QGridLayout(self.widget)
+        self.layoutWidget1 = QtWidgets.QWidget(Login)
+        self.layoutWidget1.setGeometry(QtCore.QRect(40, 160, 251, 30))
+        self.layoutWidget1.setObjectName("layoutWidget1")
+        self.gridLayout_2 = QtWidgets.QGridLayout(self.layoutWidget1)
         self.gridLayout_2.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_2.setObjectName("gridLayout_2")
-        self.pushButton = QtWidgets.QPushButton(self.widget)
+        self.pushButton = QtWidgets.QPushButton(self.layoutWidget1)
         self.pushButton.setObjectName("pushButton")
         self.gridLayout_2.addWidget(self.pushButton, 0, 0, 1, 1)
-        self.pushButton_2 = QtWidgets.QPushButton(self.widget)
+        self.pushButton_2 = QtWidgets.QPushButton(self.layoutWidget1)
         self.pushButton_2.setObjectName("pushButton_2")
         self.gridLayout_2.addWidget(self.pushButton_2, 0, 1, 1, 1)
-        self.pushButton_3 = QtWidgets.QPushButton(self.widget)
+        self.pushButton_3 = QtWidgets.QPushButton(self.layoutWidget1)
         self.pushButton_3.setObjectName("pushButton_3")
         self.gridLayout_2.addWidget(self.pushButton_3, 0, 2, 1, 1)
 
