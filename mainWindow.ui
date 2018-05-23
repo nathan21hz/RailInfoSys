@@ -42,7 +42,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>5</number>
     </property>
     <widget class="QWidget" name="tab_user">
      <attribute name="title">
@@ -1153,7 +1153,7 @@
         <x>20</x>
         <y>100</y>
         <width>721</width>
-        <height>411</height>
+        <height>361</height>
        </rect>
       </property>
       <property name="editTriggers">
@@ -1228,6 +1228,75 @@
       <property name="text">
        <string>查询</string>
       </property>
+     </widget>
+     <widget class="QPushButton" name="button_ticket_order">
+      <property name="geometry">
+       <rect>
+        <x>604</x>
+        <y>480</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>订票</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_order">
+     <attribute name="title">
+      <string>我的订单</string>
+     </attribute>
+     <widget class="QTableWidget" name="table_order">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>721</width>
+        <height>491</height>
+       </rect>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <column>
+       <property name="text">
+        <string>订单ID</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>用户名</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>车次号</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>从</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>到</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>票价</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>订单状态</string>
+       </property>
+      </column>
      </widget>
     </widget>
     <widget class="QWidget" name="tab">
@@ -1679,6 +1748,22 @@ No. 2015111573
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>button_ticket_order</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ticketOrder()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>694</x>
+     <y>548</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>792</x>
+     <y>575</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>userEdit()</slot>
@@ -1702,5 +1787,6 @@ No. 2015111573
   <slot>lineEdit()</slot>
   <slot>lineTablere()</slot>
   <slot>ticketQuery()</slot>
+  <slot>ticketOrder()</slot>
  </slots>
 </ui>

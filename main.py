@@ -11,6 +11,7 @@ basiccursor = basicconn.cursor()
 trainconn = sqlite3.connect('./DB/Train.db')
 traincursor = trainconn.cursor()
 userlevel = 0
+userid = 0
 
 #重写主界面类
 class MyWindow(Ui_MainWindow):
@@ -82,6 +83,25 @@ class MyWindow(Ui_MainWindow):
                 self.combo_ticket_depart.addItem(s[2]+'|'+s[1])
                 self.combo_ticket_arrive.addItem(s[2]+'|'+s[1])
             pass
+        elif(page == 5):
+            status = ("已出票", "已使用", )
+            self.table_order.clearContents()
+            basiccursor.execute('select * from "order" where uid=?', (userid, ))
+            orders = basiccursor.fetchall()
+            self.table_order.setRowCount(len(orders))
+            for index, o in enumerate(orders):
+                self.table_order.setItem(index,0, QtWidgets.QTableWidgetItem(str(o[0])))
+            for index, o in enumerate(orders):
+                self.table_order.setItem(index,1, QtWidgets.QTableWidgetItem(uidToName(o[1])))
+            for index, o in enumerate(orders):
+                self.table_order.setItem(index,2, QtWidgets.QTableWidgetItem(o[2]))
+            for index, o in enumerate(orders):
+                for i in range(3, 5):
+                    self.table_order.setItem(index,i, QtWidgets.QTableWidgetItem(stationCodeToName(o[i])))
+            for index, o in enumerate(orders):
+                self.table_order.setItem(index,5, QtWidgets.QTableWidgetItem(str(o[5])))
+            for index, o in enumerate(orders):
+                self.table_order.setItem(index,6, QtWidgets.QTableWidgetItem(status[o[6]]))
         pass
         
     #用户列表选择动作
@@ -399,12 +419,35 @@ class MyWindow(Ui_MainWindow):
                 titleline = "方案"+str(index+1)+"    换乘站："+stationCodeToName(t["transcity"])+"    实际费用合计："+str(totalcost)+"元    总历时："+str(totalduring)+"分钟"
                 self.table_ticket.setItem(index*3,0, QtWidgets.QTableWidgetItem(titleline))
                 
+    def ticketOrder(self):
+        global userid
+        if(self.table_ticket.currentRow()!=-1):
+            if(self.checkBox.checkState()==2 and self.table_ticket.currentRow()%3==0):
+                return
+            basiccursor.execute('select max(id) from "order"')
+            maxid = basiccursor.fetchone()
+            maxid = maxid[0] if maxid[0]!=None else 0
+            traincode = self.table_ticket.item(self.table_ticket.currentRow(), 0).text()
+            depart = nameToStationCode(self.table_ticket.item(self.table_ticket.currentRow(), 3).text())
+            arrive = nameToStationCode(self.table_ticket.item(self.table_ticket.currentRow(), 4).text())
+            cost = self.table_ticket.item(self.table_ticket.currentRow(), 5).text()
+            
+            ans = QMessageBox.information(MainWindow,"提示", "请检查您的车票订单：\n订单号："+str(maxid+1)+"\n用户名："+uidToName(userid)+"\n车次号："+traincode+"\n应付款："+str(cost)+" 元"
+            ,QMessageBox.Yes|QMessageBox.No)
+            if(ans == QMessageBox.Yes):
+                basiccursor.execute('insert into "order" values(?,?,?,?,?,?,0)', (maxid+1, userid, traincode, depart, arrive, cost, ))
+                basicconn.commit()
+                QMessageBox.information(MainWindow,"提示", "订票成功\n请前往“我的订单”页查看。",QMessageBox.Yes)
+            else:
+                QMessageBox.information(MainWindow,"提示", "订单取消",QMessageBox.Yes)
+        pass
                 
 
 #重写登陆窗口类            
 class MyLoginDlg(Ui_Login):
     def Login(self):
         global userlevel
+        global userid
         leveltable = {0:"管理员", 1:"工作人员", 2:"旅客"}
         name = self.lineedit_name.text()
         password = self.lineedit_password.text()
@@ -414,6 +457,7 @@ class MyLoginDlg(Ui_Login):
             MainWindow.show()
             LoginDialog.close()
             userlevel = userinfo[1]
+            userid = userinfo[0]
             if(userlevel == 1):
                 ui.tabWidget.setTabEnabled(0, False)
             elif(userlevel > 1):
@@ -474,6 +518,18 @@ def stationCodeToName(code):
         basiccursor.execute('select name from station where code=?', (code, ))
         name = basiccursor.fetchone()
         return name[0]
+
+#通过车站名查询并返回车站代码
+def nameToStationCode(name):
+    basiccursor.execute('select code from station where name=?', (name, ))
+    code = basiccursor.fetchone()
+    return code[0]
+        
+#通过uid返回用户名
+def uidToName(uid):
+    basiccursor.execute('select username from userinfo where uid=?', (uid, ))
+    name = basiccursor.fetchone()
+    return name[0]
 
 #判断列车是否经过某城市 
 #mode 1 :始发 mode 2:终到
