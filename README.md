@@ -16,4 +16,4 @@ For coursework of Railway Information Systerm
 - [x] One-Way Ticket Query
 - [x] Transfer Ticket Query
 - [x] Actual During Time and Cost Query for One-Way and Transfer
-- [ ] Book Ticket & Seats Auto Calculation
+- [x] Book Ticket & Seats Auto Calculation
