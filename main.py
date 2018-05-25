@@ -85,6 +85,7 @@ class MyWindow(Ui_MainWindow):
             pass
         elif(page == 5):
             status = ("已出票", "已使用", )
+            seattable = ("一等座", "二等座", )
             self.table_order.clearContents()
             basiccursor.execute('select * from "order" where uid=?', (userid, ))
             orders = basiccursor.fetchall()
@@ -99,9 +100,11 @@ class MyWindow(Ui_MainWindow):
                 for i in range(3, 5):
                     self.table_order.setItem(index,i, QtWidgets.QTableWidgetItem(stationCodeToName(o[i])))
             for index, o in enumerate(orders):
-                self.table_order.setItem(index,5, QtWidgets.QTableWidgetItem(str(o[5])))
+                self.table_order.setItem(index,6, QtWidgets.QTableWidgetItem(str(o[6])))
             for index, o in enumerate(orders):
-                self.table_order.setItem(index,6, QtWidgets.QTableWidgetItem(status[o[6]]))
+                self.table_order.setItem(index,5, QtWidgets.QTableWidgetItem(seattable[o[5]]))
+            for index, o in enumerate(orders):
+                self.table_order.setItem(index,7, QtWidgets.QTableWidgetItem(status[o[7]]))
         pass
         
     #用户列表选择动作
@@ -421,6 +424,7 @@ class MyWindow(Ui_MainWindow):
                 
     def ticketOrder(self):
         global userid
+        seattable={0:"一等座", 1:"二等座"}
         if(self.table_ticket.currentRow()!=-1):
             if(self.checkBox.checkState()==2 and self.table_ticket.currentRow()%3==0):
                 return
@@ -430,18 +434,41 @@ class MyWindow(Ui_MainWindow):
             traincode = self.table_ticket.item(self.table_ticket.currentRow(), 0).text()
             depart = nameToStationCode(self.table_ticket.item(self.table_ticket.currentRow(), 3).text())
             arrive = nameToStationCode(self.table_ticket.item(self.table_ticket.currentRow(), 4).text())
-            cost = self.table_ticket.item(self.table_ticket.currentRow(), 5).text()
+            level = self.combo_ticket_level.currentIndex()
+            cost = int(self.table_ticket.item(self.table_ticket.currentRow(), 5).text())*2
             
-            ans = QMessageBox.information(MainWindow,"提示", "请检查您的车票订单：\n订单号："+str(maxid+1)+"\n用户名："+uidToName(userid)+"\n车次号："+traincode+"\n应付款："+str(cost)+" 元"
+            ans = QMessageBox.information(MainWindow,"提示", "请检查您的车票订单：\n订单号："+str(maxid+1)+"\n用户名："+uidToName(userid)+"\n车次号："+traincode+"\n座位："+seattable[level]+"\n应付款："+str(cost)+" 元"
             ,QMessageBox.Yes|QMessageBox.No)
             if(ans == QMessageBox.Yes):
-                basiccursor.execute('insert into "order" values(?,?,?,?,?,?,0)', (maxid+1, userid, traincode, depart, arrive, cost, ))
+                basiccursor.execute('insert into "order" values(?,?,?,?,?,?,?,0)', (maxid+1, userid, traincode, depart, arrive, level, cost, ))
+                if(level==0):
+                    basiccursor.execute('update train set firstclass=firstclass-1 where code=?', (traincode, ))
+                elif(level==1):
+                    basiccursor.execute('update train set secondclass=secondclass-1 where code=?', (traincode, ))
                 basicconn.commit()
                 QMessageBox.information(MainWindow,"提示", "订票成功\n请前往“我的订单”页查看。",QMessageBox.Yes)
             else:
                 QMessageBox.information(MainWindow,"提示", "订单取消",QMessageBox.Yes)
         pass
-                
+        
+    def orderRefund(self):
+        if(self.table_order.currentRow()!=-1):
+            ans = QMessageBox.information(MainWindow,"提示", "您确认要退票吗？",QMessageBox.Yes|QMessageBox.No)
+            if(ans == QMessageBox.Yes):
+                orderid = self.table_order.item(self.table_order.currentRow(), 0).text()
+                basiccursor.execute('select traincode,level from "order" where id=?', (orderid, ))
+                delordertrain = basiccursor.fetchone()
+                delcode = delordertrain[0]
+                dellevel = delordertrain[1]
+                if(dellevel==0):
+                    basiccursor.execute('update train set firstclass=firstclass+1 where code=?', (delcode, ))
+                elif(dellevel==1):
+                    basiccursor.execute('update train set secondclass=secondclass+1 where code=?', (delcode, ))
+                basiccursor.execute('delete from "order" where id=?', (orderid, ))
+                basicconn.commit()
+                QMessageBox.information(MainWindow,"提示", "退票成功",QMessageBox.Yes)
+                self.refreshAll()
+                pass
 
 #重写登陆窗口类            
 class MyLoginDlg(Ui_Login):
