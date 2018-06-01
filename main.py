@@ -12,7 +12,6 @@ trainconn = sqlite3.connect('./DB/Train.db')
 traincursor = trainconn.cursor()
 userlevel = 0
 userid = 0
-aaa=1
 
 #重写主界面类
 class MyWindow(Ui_MainWindow):
@@ -437,7 +436,7 @@ class MyWindow(Ui_MainWindow):
             depart = nameToStationCode(self.table_ticket.item(self.table_ticket.currentRow(), 3).text())
             arrive = nameToStationCode(self.table_ticket.item(self.table_ticket.currentRow(), 4).text())
             level = self.combo_ticket_level.currentIndex()
-            cost = int(self.table_ticket.item(self.table_ticket.currentRow(), 5).text())*2
+            cost = int(self.table_ticket.item(self.table_ticket.currentRow(), 5).text())*(2-level)
             
             ans = QMessageBox.information(MainWindow,"提示", "请检查您的车票订单：\n订单号："+str(maxid+1)+"\n用户名："+uidToName(userid)+"\n车次号："+traincode+"\n座位："+seattable[level]+"\n应付款："+str(cost)+" 元"
             ,QMessageBox.Yes|QMessageBox.No)
@@ -657,7 +656,7 @@ def transferTicketQuery(depart, arrive):
                     transferlist.append({"line1":line1, "transcity":transcity, "line2":line2})
     return transferlist
     pass
-    
+
 #某列车两站间时间/费用（返回字典）
 def partTimecost(trainid, depart, arrive):
     departtemp = cityIntrain(depart, trainid, 1)

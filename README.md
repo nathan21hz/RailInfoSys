@@ -4,7 +4,7 @@ For coursework of Railway Information Systerm
 ## Using
 - Python 3.5
 - SQLite3 for Database
-- PyQt5 for GUI  
+- PyQt5 for GUI
 
 ## Function List  
 - [x] Login & Register
