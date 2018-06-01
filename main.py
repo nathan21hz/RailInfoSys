@@ -12,6 +12,7 @@ trainconn = sqlite3.connect('./DB/Train.db')
 traincursor = trainconn.cursor()
 userlevel = 0
 userid = 0
+transcitylist =[]
 
 #重写主界面类
 class MyWindow(Ui_MainWindow):
@@ -364,6 +365,8 @@ class MyWindow(Ui_MainWindow):
     
     #车票查询
     def ticketQuery(self):
+        global transcitylist
+        transcitylist = []
         self.table_ticket.clearContents()
         self.table_ticket.setRowCount(0)
         if(self.checkBox.checkState()==0):
@@ -399,6 +402,7 @@ class MyWindow(Ui_MainWindow):
                 line1 = basiccursor.fetchone()
                 temp1 = partTimecost(t["line1"], self.combo_ticket_depart.currentText().split("|")[1], t["transcity"])
                 temp2 = partTimecost(t["line2"], t["transcity"], self.combo_ticket_arrive.currentText().split("|")[1])
+                transcitylist.append(t["transcity"])
                 
                 for i in range(3, 5):
                     self.table_ticket.setItem(index*3+1,i, QtWidgets.QTableWidgetItem(stationCodeToName(line1[i])))
@@ -425,20 +429,43 @@ class MyWindow(Ui_MainWindow):
     #订票
     def ticketOrder(self):
         global userid
+        global transcitylist
         seattable={0:"一等座", 1:"二等座"}
         if(self.table_ticket.currentRow()!=-1):
             if(self.checkBox.checkState()==2 and self.table_ticket.currentRow()%3==0):
                 return
-            basiccursor.execute('select max(id) from "order"')
-            maxid = basiccursor.fetchone()
-            maxid = maxid[0] if maxid[0]!=None else 0
-            traincode = self.table_ticket.item(self.table_ticket.currentRow(), 0).text()
-            depart = nameToStationCode(self.table_ticket.item(self.table_ticket.currentRow(), 3).text())
-            arrive = nameToStationCode(self.table_ticket.item(self.table_ticket.currentRow(), 4).text())
-            level = self.combo_ticket_level.currentIndex()
-            cost = int(self.table_ticket.item(self.table_ticket.currentRow(), 5).text())*(2-level)
+            if(self.checkBox.checkState()==0):
+                basiccursor.execute('select max(id) from "order"')
+                maxid = basiccursor.fetchone()
+                maxid = maxid[0] if maxid[0]!=None else 0
+                traincode = self.table_ticket.item(self.table_ticket.currentRow(), 0).text()
+                depart = self.combo_ticket_depart.currentText().split("|")[1]
+                arrive = self.combo_ticket_arrive.currentText().split("|")[1]
+                level = self.combo_ticket_level.currentIndex()
+                cost = int(self.table_ticket.item(self.table_ticket.currentRow(), 5).text())*(2-level)
+                
+            elif(self.checkBox.checkState()==2 and self.table_ticket.currentRow()%3==1):
+                basiccursor.execute('select max(id) from "order"')
+                maxid = basiccursor.fetchone()
+                maxid = maxid[0] if maxid[0]!=None else 0
+                traincode = self.table_ticket.item(self.table_ticket.currentRow(), 0).text()
+                depart = self.combo_ticket_depart.currentText().split("|")[1]
+                arrive = transcitylist[int(self.table_ticket.currentRow()/3)]
+                level = self.combo_ticket_level.currentIndex()
+                cost = int(self.table_ticket.item(self.table_ticket.currentRow(), 5).text())*(2-level)
+                
+            elif(self.checkBox.checkState()==2 and self.table_ticket.currentRow()%3==2):
+                basiccursor.execute('select max(id) from "order"')
+                maxid = basiccursor.fetchone()
+                maxid = maxid[0] if maxid[0]!=None else 0
+                traincode = self.table_ticket.item(self.table_ticket.currentRow(), 0).text()
+                depart = transcitylist[int(self.table_ticket.currentRow()/3)]
+                arrive = self.combo_ticket_arrive.currentText().split("|")[1]
+                level = self.combo_ticket_level.currentIndex()
+                cost = int(self.table_ticket.item(self.table_ticket.currentRow(), 5).text())*(2-level)
             
-            ans = QMessageBox.information(MainWindow,"提示", "请检查您的车票订单：\n订单号："+str(maxid+1)+"\n用户名："+uidToName(userid)+"\n车次号："+traincode+"\n座位："+seattable[level]+"\n应付款："+str(cost)+" 元"
+            ans = QMessageBox.information(MainWindow,"提示", "请检查您的车票订单：\n订单号："+str(maxid+1)+"\n用户名："+uidToName(userid)+"\n车次号："+traincode+
+                                                                         "\n从："+stationCodeToName(depart)+"\n到："+stationCodeToName(arrive)+"\n座位："+seattable[level]+"\n应付款："+str(cost)+" 元"
             ,QMessageBox.Yes|QMessageBox.No)
             if(ans == QMessageBox.Yes):
                 basiccursor.execute('select firstclass,secondclass from train where code=?', (traincode, ))
