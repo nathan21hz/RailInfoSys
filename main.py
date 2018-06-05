@@ -5,6 +5,7 @@ from Ui_loginWindow import Ui_Login
 from Ui_registerWindow import Ui_Register
 import sqlite3
 import datetime
+import icon_rc
 
 basicconn = sqlite3.connect('./DB/BasicData.db')
 basiccursor = basicconn.cursor()
@@ -717,9 +718,9 @@ def checkUserlevel(requsetlevel):
 
 #初始化
 def Initial():
-    MainWindow.setWindowIcon(QtGui.QIcon('icon.ico'))
-    LoginDialog.setWindowIcon(QtGui.QIcon('icon.ico'))
-    RegDialog.setWindowIcon(QtGui.QIcon('icon.ico'))
+    MainWindow.setWindowIcon(QtGui.QIcon(':icon.ico'))
+    LoginDialog.setWindowIcon(QtGui.QIcon(':icon.ico'))
+    RegDialog.setWindowIcon(QtGui.QIcon(':icon.ico'))
 
 if __name__ == "__main__":
     import sys
