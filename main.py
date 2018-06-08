@@ -130,9 +130,15 @@ class MyWindow(Ui_MainWindow):
     #删除用户
     def userDel(self):
         if(self.lineedit_user_uid.text()):
-            basiccursor.execute('delete from userinfo where uid=?', (self.lineedit_user_uid.text()))
-            basicconn.commit()
-            self.refreshAll()
+            basiccursor.execute('select count(*) from "order" where uid=?', (self.lineedit_user_uid.text(), ))
+            useruse = basiccursor.fetchone()[0]
+            if(useruse>0):
+                QMessageBox.information(MainWindow,"提示", "该用户存在过购买记录，无法删除",QMessageBox.Yes)
+                return
+            else:
+                basiccursor.execute('delete from userinfo where uid=?', (self.lineedit_user_uid.text(), ))
+                basicconn.commit()
+                self.refreshAll()
         else:
             QMessageBox.information(MainWindow,"提示", "请先选择要删除的用户",QMessageBox.Yes)
     
@@ -183,8 +189,18 @@ class MyWindow(Ui_MainWindow):
     def stationDel(self):
         if(checkUserlevel(0)):
             if(self.list_station_list.currentItem()):
-                basiccursor.execute('delete from station where id=?', (self.list_station_list.currentItem().text().split("|")[0], ))
-                basicconn.commit()
+                id = self.list_station_list.currentItem().text().split("|")[0]
+                basiccursor.execute('select code from station where id=?', (id, ))
+                citycode = basiccursor.fetchone()[0]
+                basiccursor.execute('select count(*) from raillink where "from"=? or "to"=?', (citycode ,citycode , ))
+                cityuse = basiccursor.fetchone()[0]
+                if(cityuse>0):
+                    QMessageBox.information(MainWindow,"提示", "该车站被使用过，无法删除",QMessageBox.Yes)
+                    self.refreshAll()
+                    return
+                else:
+                    basiccursor.execute('delete from station where id=?', (id, ))
+                    basicconn.commit()
                 self.refreshAll()
             else:
                 QMessageBox.information(MainWindow,"提示", "请先选择要删除的车站",QMessageBox.Yes)
@@ -226,6 +242,15 @@ class MyWindow(Ui_MainWindow):
         if(checkUserlevel(0)):
             if(self.table_line.currentRow()!=-1):
                 id =  self.table_line.item(self.table_line.currentRow(), 0).text()
+                basiccursor.execute('select id from train')
+                trains = basiccursor.fetchall()
+                for t in trains:
+                    traintable = "train_"+str(t[0])
+                    traincursor.execute('select count(*) from '+traintable+' where linkid=?', (id, ))
+                    trainuse = traincursor.fetchone()[0]
+                    if(trainuse>0):
+                        QMessageBox.information(MainWindow,"提示", "该线路被使用，无法删除",QMessageBox.Yes)
+                        return
                 basiccursor.execute('delete from raillink where id=?', (id, ))
                 basicconn.commit()
                 self.refreshAll()
